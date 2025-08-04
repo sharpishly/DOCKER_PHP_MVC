@@ -46,7 +46,7 @@ server {
     server_name sharpishly.com www.sharpishly.com;
 
     location / {
-        root /var/www/html/public;
+        root /var/www/sharpishly/website/public;
         index index.php index.html index.htm;
         try_files \$uri \$uri/ =404;
     }
@@ -55,14 +55,13 @@ server {
         include fastcgi_params;
         fastcgi_pass php:9000;
         fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME /var/www/html/public\$fastcgi_script_name;
+        fastcgi_param SCRIPT_FILENAME /var/www/sharpishly/website/public\$fastcgi_script_name;
     }
 
     location ~ /\.ht {
         deny all;
     }
 
-    # Redirect to HTTPS
     return 301 https://\$host\$request_uri;
 }
 
@@ -74,7 +73,7 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/sharpishly.com/privkey.pem;
 
     location / {
-        root /var/www/html/public;
+        root /var/www/sharpishly/website/public;
         index index.php index.html index.htm;
         try_files \$uri \$uri/ =404;
     }
@@ -83,7 +82,7 @@ server {
         include fastcgi_params;
         fastcgi_pass php:9000;
         fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME /var/www/html/public\$fastcgi_script_name;
+        fastcgi_param SCRIPT_FILENAME /var/www/sharpishly/website/public\$fastcgi_script_name;
     }
 }
 EOF
@@ -100,7 +99,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./website:/var/www/html
+      - ./website:/var/www/sharpishly/website
       - /etc/letsencrypt:/etc/letsencrypt
     depends_on:
       - php
@@ -108,7 +107,7 @@ services:
   php:
     build: ./php
     volumes:
-      - ./website:/var/www/html
+      - ./website:/var/www/sharpishly/website
     env_file: .env
 
   db:
@@ -124,10 +123,9 @@ EOF
 
 echo "✅ All files created."
 echo "Next steps:"
-echo "1. Make sure your DNS points to this server."
-echo "2. Run 'docker-compose up -d' to start containers."
-echo "3. Install certbot on the host and run initial certificate issuance:"
-echo "   sudo apt update && sudo apt install certbot python3-certbot-nginx -y"
+echo "1. Point DNS to this server."
+echo "2. Run: docker-compose up -d"
+echo "3. On host, install certbot and run:"
+echo "   sudo apt install certbot python3-certbot-nginx -y"
 echo "   sudo certbot --nginx -d sharpishly.com -d www.sharpishly.com"
-echo "4. Your site should be available at https://sharpishly.com"
-
+echo "4. Your site will be available at https://sharpishly.com"
